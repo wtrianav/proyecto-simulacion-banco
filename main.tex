@@ -1,0 +1,65 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{enumitem}
+\setlist[itemize]{label=-}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\title{\textbf{Informe de Modelado y Simulación - Solución de un problema bancario}}
+
+\author{
+\textbf{Wilmer Andrés Triana Vega} \\
+\textit{Simulación PREICA2602B020045} \\
+\textit{Ingeniería de Software y Datos} \\
+\textit{Institución Universitaria Digital de Antioquia} \\
+\textit{18 de noviembre de 2026}
+}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Introducción}
+El presente informe detalla el modelado y simulación de las operaciones de caja del Banco de Colombia, el cual dispone de tres cajeros para procesar transacciones de retiro y consignación/pago. Dado que la institución carece de cajeros electrónicos, el objetivo principal es determinar la distribución óptima de las tres cajas disponibles (ya sea asignando una caja exclusiva para retiros y dos para pagos, o viceversa) garantizando la prestación del mejor servicio. El sistema es evaluado bajo un modelo de colas M/M/1 independiente para cada servicio, contemplando jornadas operativas de 8 horas diarias.
+
+\section{Metodología}
+La evaluación se desarrolló utilizando un enfoque de simulación de eventos discretos mediante el lenguaje Python y la librería \texttt{simpy}.
+
+\begin{itemize}
+    \item \textbf{Modelado del Sistema:} Se configuraron dos escenarios: Modelo 1 (2 cajas de retiro, 1 de pago) y Modelo 2 (1 caja de retiro, 2 de pago). Cada cajero se modeló como un sistema M/M/1 asumiendo independencia, velocidad de desplazamiento nula y atención inmediata al llegar a la caja.
+    \item \textbf{Distribuciones:} Los tiempos de llegada y tiempos de servicio se programaron con distribuciones exponenciales de acuerdo con las medias establecidas para los perfiles de usuario (Rápido, Normal, Lento, Muy lento). Se contempló que el 70\,\% de los usuarios asiste para realizar retiros.
+    \item \textbf{Ejecución:} Se programaron 10 réplicas de 480 minutos (8 horas) cada una. En cada iteración se recolectaron los tiempos de espera en cola, los tiempos de atención efectivos y el conteo de usuarios generados por tipo de transacción.
+\end{itemize}
+
+\section{Resultados}
+
+\begin{itemize}
+    \item \textbf{Identificación de tiempos de atención:} Tras analizar las 10 réplicas del modelo, se evidenció que el cajero con menor tiempo promedio de atención es el destinado a Retiros, con un tiempo de 1.96 a 1.97 minutos por usuario. Por el contrario, el cajero con mayor tiempo promedio de atención es el de Consignaciones o Pagos, registrando entre 3.67 y 3.89 minutos por transacción.
+    
+    \item \textbf{Total y Promedio de usuarios por tipo:} La simulación de jornadas de 8 horas arrojó la siguiente afluencia promedio para el Modelo 2 (1 Retiro, 2 Pagos), el cual presenta una distribución global de clientes:
+    \begin{itemize}
+        \item \textit{Retiro:} Rápido: 476.2, Normal: 241.8, Lento: 161.1, Muy lento: 164.6.
+        \item \textit{Pagos:} Rápido: 487.1, Normal: 236.3, Lento: 159.7, Muy lento: 118.7.
+    \end{itemize}
+    Al contrastar ambos modelos, la categoría con la menor cantidad de usuarios atendidos corresponde siempre a los usuarios "Muy lentos" del servicio de Pagos, registrando 121.3 en el Modelo 1 y 118.7 en el Modelo 2.
+    
+    \item \textbf{Tiempos de espera y necesidad de un nuevo cajero:} Los resultados demuestran un nivel crítico de congestión en ambos escenarios sin soporte electrónico. En el Modelo 1 (2 Retiros, 1 Pago), los tiempos de espera promedian 128.96 minutos para retiros y alcanzan 206.58 minutos para pagos. En el Modelo 2 (1 Retiro, 2 Pagos), los retiros esperan 186.41 minutos y los pagos 172.02 minutos. Con base en estos tiempos de espera, que superan holgadamente las 2 y 3 horas, es estrictamente necesario crear un nuevo cajero electrónico que absorba la demanda transaccional.
+\end{itemize}
+
+\section{Conclusiones}
+
+\begin{itemize}
+    \item \textbf{Asignación de cajas:} Dados los recursos actuales (3 cajas humanas) y los resultados de la simulación, la configuración menos perjudicial es el \textbf{Modelo 2: asignar 2 cajeros para consignaciones/pagos y 1 cajero para retiros}. Aunque el tiempo de espera en retiros se eleva a 186.41 minutos, esta distribución permite reducir drásticamente el colapso en pagos, bajando su espera promedio de 206.58 a 172.02 minutos, equilibrando la carga operativa ante los elevados tiempos de servicio que requiere esta área (3.67 min frente a 1.96 min de los retiros).
+    
+    \item \textbf{Decisión sobre el cajero automático:} La modelación demuestra que 3 cajas humanas son insuficientes para el volumen de llegadas establecido. La implementación de un cajero electrónico no es opcional, sino una medida obligatoria. Este dispositivo debería configurarse para absorber la alta demanda (70\,\%) de retiros rápidos y normales, lo que despejaría casi 700 usuarios diarios de las filas, permitiendo que el personal humano atienda de forma fluida los pagos y consignaciones complejas.
+\end{itemize}
+
+\section{Link del Repositorio}
+https://github.com/wtrianav/proyecto-simulacion-banco.git
+
+\end{document}
